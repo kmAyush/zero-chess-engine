@@ -1,31 +1,17 @@
 #!/usr/bin/env python
-import os
-import chess.pgn
-from state import State
+from torch.utils.data import Dataset
+import numpy as np
 
-def get_XY(num_samples = None):
-    X, Y = [], []
-    count = 0
-    for fn in os.listdir("dataset"):
-        pgn = open(os.path.join("dataset", fn))
-        while True:
-            try:
-                game = chess.pgn.read_game(pgn)
-            except Exception:
-                break
-            print(f"parsing game {count} got {len(X)} examples")
-            count +=1
-            value = {"1/2-1/2":0, "0-1":-1, "1-0":1}[game.headers["Result"]] 
-            board = game.board()
+class ValueDataset(Dataset):
+    def __init__(self):
+        data = np.load("processed/dataset_1k.npz")
+        self.X = data['arr_0']
+        self.Y = data['arr_1']
 
-            for i, move in enumerate(game.mainline_moves()):
-                board.push(move)
-                serialized_form = State(board).serialize()[:,:,0]
-                X.append(serialized_form)
-                Y.append(value)
-            if num_samples is not None and len(X) > num_samples:
-                return X, Y
-        #break
+    def __len__(self):
+        return self.X.shape[0]
 
-if __name__ == "__main__":
-    get_XY(1000)
+    def __getitem__(self, index):
+        return {'X': self.X[index], 'Y': self.Y[index]}
+
+data = ValueDataset()
