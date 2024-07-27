@@ -12,6 +12,9 @@ class State(object):
 
 	def edges(self):
 		return list(self.board.legal_moves)
+	
+	def key(self):
+		return (self.board.board_fen(), self.board.turn, self.board.castling_rights, self.board.ep_square)
 
 	def serialize(self):
 		assert self.board.is_valid()
@@ -41,16 +44,16 @@ class State(object):
 		bstate = bstate.reshape(8, 8) 
 
 		# Binary State
-		state = np.zeros((8,8,5), np.uint8)
+		state = np.zeros((5,8,8), np.uint8)
 
 		# Column 0,1,2,3
-		state[:,:,0] = (bstate >> 3) & 1
-		state[:,:,1] = (bstate >> 2) & 1
-		state[:,:,2] = (bstate >> 1) & 1
-		state[:,:,3] = (bstate >> 0) & 1
+		state[0] = (bstate >> 3) & 1
+		state[1] = (bstate >> 2) & 1
+		state[2] = (bstate >> 1) & 1
+		state[3] = (bstate >> 0) & 1
 
 		# Column 4
-		state[:,:,4] = (self.board.turn*1.0)
+		state[4] = (self.board.turn*1.0)
 		return state
 		# print(self.board.turn)
 		# 257 bits 8*8*4 + 1
