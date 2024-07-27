@@ -8,6 +8,8 @@ def get_XY(num_samples = None):
     X, Y = [], []
     count = 0
     values = {"1/2-1/2":0, "0-1":-1, "1-0":1}
+    if num_samples is not None:
+        print(num_samples)
     for fn in os.listdir("dataset"):
         pgn = open(os.path.join("dataset", fn))
         while True:
@@ -15,7 +17,7 @@ def get_XY(num_samples = None):
             game = chess.pgn.read_game(pgn)
             if game is None:
                 break
-            print(f"parsing game {count} got {len(X)} examples")
+            #print(f"parsing game {count} got {len(X)} examples")
             result = game.headers["Result"]
             if result not in values:
                 continue
@@ -34,5 +36,7 @@ def get_XY(num_samples = None):
         #break
 
 if __name__ == "__main__":
-    X, Y = get_XY(1e3)
-    np.savez("processed/dataset_1k.npz", X, Y)
+    X, Y = get_XY()
+    if not os.path.exists("serialized_data"):
+        os.makedirs("serialized_data")
+    np.savez("serialized_data/dataset_full.npz", X, Y)

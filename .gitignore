@@ -1,3 +1,4 @@
 dataset/
 __pycache__/
-processed/
+models/
+serialized_data/

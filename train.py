@@ -9,7 +9,7 @@ from torch import optim
 
 class ValueDataset(Dataset):
     def __init__(self):
-        data = np.load("processed/dataset_1k.npz")
+        data = np.load("serialized_data/dataset_1k.npz")
         self.X = data['arr_0']
         self.Y = data['arr_1']
 
@@ -70,7 +70,6 @@ class NeuralNet(nn.Module):
 
     def forward(self, x):
 
-        print(x.shape)
         x = F.relu(self.a1(x))
         x = F.relu(self.a2(x))
         x = F.relu(self.a3(x))
@@ -91,35 +90,43 @@ class NeuralNet(nn.Module):
         x = F.relu(self.d3(x))
 
         x = x.view(-1, 128)  # [B, 128, 1, 1] => [B, 128] 
-        x = self.linear_layer(x) 
-        print((F.tanh(x)).shape)
+        x = self.linear_layer(x)
         return F.tanh(x)
-    
-chess_dataset = ValueDataset()
-data_loader = DataLoader(chess_dataset, batch_size = 32, shuffle = True)
-model = NeuralNet()
-optimizer = optim.Adam(model.parameters())
-mse_loss = nn.MSELoss()
 
-device = torch.device("cpu")
-if device == "cuda":
-    model.cuda()
+if __name__ == "__main__":    
+    chess_dataset = ValueDataset()
+    data_loader = DataLoader(chess_dataset, batch_size = 32, shuffle = True)
+    model = NeuralNet()
+    optimizer = optim.Adam(model.parameters())
+    mse_loss = nn.MSELoss()
 
-model.train()
+    device = torch.device("cpu")
+    if device == "cuda":
+        model.cuda()
 
-for batch_idx, (data, target) in enumerate(data_loader):
+    model.train()
+    print("Dataset Size : ", len(chess_dataset))
 
-    #print("X shape = ", data.shape)
-    #print("Y shape = ", target.shape)
-    target = target.unsqueeze(-1)
-    data, target = data.to(device), target.to(device)
-    data = data.float()
-    target = target.float()
+    for epoch in range(100):
+        total_loss = 0
+        iterations = 0
+        for batch_idx, (data, target) in enumerate(data_loader):
 
-    optimizer.zero_grad()
-    output = model(data)
+            #print("X shape = ", data.shape)
+            #print("Y shape = ", target.shape)
+            target = target.unsqueeze(-1)
+            data, target = data.to(device), target.to(device)
+            data = data.float()
+            target = target.float()
 
-    loss = mse_loss(output, target)
-    loss.backward()
-    optimizer.step()
-    print(f"{batch_idx} : {loss.item()}")
+            optimizer.zero_grad()
+            output = model(data)
+
+            loss = mse_loss(output, target)
+            loss.backward()
+            optimizer.step()
+
+            total_loss += loss.item()
+            iterations += 1
+        print(f"{epoch} : {total_loss/iterations}")
+        torch.save(model, f"models/examples_{len(chess_dataset)}.pth")
