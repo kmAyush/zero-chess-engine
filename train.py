@@ -8,8 +8,8 @@ import numpy as np
 from torch import optim
 
 class ValueDataset(Dataset):
-    def __init__(self):
-        data = np.load("serialized_data/dataset_1k.npz")
+    def __init__(self, data_size):
+        data = np.load(f"serialized_data/dataset_{data_size}.npz")
         self.X = data['arr_0']
         self.Y = data['arr_1']
 
@@ -93,8 +93,9 @@ class NeuralNet(nn.Module):
         x = self.linear_layer(x)
         return F.tanh(x)
 
-if __name__ == "__main__":    
-    chess_dataset = ValueDataset()
+if __name__ == "__main__":
+    data_size = '10k'    
+    chess_dataset = ValueDataset(data_size)
     data_loader = DataLoader(chess_dataset, batch_size = 32, shuffle = True)
     model = NeuralNet()
     optimizer = optim.Adam(model.parameters())
@@ -129,4 +130,4 @@ if __name__ == "__main__":
             total_loss += loss.item()
             iterations += 1
         print(f"{epoch} : {total_loss/iterations}")
-        torch.save(model, f"models/examples_{len(chess_dataset)}.pth")
+        torch.save(model, f"models/examples_{data_size}.pth")
