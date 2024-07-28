@@ -42,20 +42,20 @@ eval = Evaluator()
 s = State()
 
 @app.route("/")
-def hello():
+def home():
     board_svg = get_svg(s)    
     return f'''
     <html>
     <body style="background-color:#22272d;">
-        <img src="data:image/svg+xml;base64,{board_svg}" style="max-width:500px">
-        <br><br>
-        
-        <div align="center">
+        <div align="center" style="padding-top:10px;">
+            <img src="data:image/svg+xml;base64,{board_svg}" style="max-width:500px">
+            <br><br>
             <h3 style="color:white;">FEN format input</h3>
             <form action="/human">
                 <input name="move" style="font-size:20px;" type='text'></input>
                 <input style="font-size:20px;" type='submit' value='Move'>
             </form><br>
+            <button onclick="document.location='/selfplay'">Play against itself</button>
         </div>
     '''
 @app.route("/board.svg")
@@ -73,10 +73,17 @@ def computer_move(s, eval):
 @app.route("/selfplay")
 def selfplay():
     s = State()
-    return_str = "<html><body style='background-color:#22272d;'><head>"
+    return_str = '''<html><body style="background-color:#22272d;">
+    '''
     while not s.board.is_game_over():
         computer_move(s, eval)
-        return_str += f"<img width=400 height=400 src='data:image/svg+xml;base64,{get_svg(s)}'><br/>"
+        return_str += f"""
+        <img width=400 height=400 src='data:image/svg+xml;base64,{get_svg(s)}'>
+        """
+    return_str+='''
+    </ul>
+    </section>
+    '''
     print(s.board.result())
     return return_str
         
@@ -94,7 +101,7 @@ def human_move():
                 traceback.print_exc()
     else:
         print("Game is Over")
-    return hello()+f"{move}"
+    return home()
     
 #computer_move()
 
