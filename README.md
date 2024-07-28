@@ -16,7 +16,7 @@ Value - {1 for win, 0 for draw, -1 for loss}
 
 About
 -----
-* Trained on MNIST examples-like CNN architecture.
+* Trained on 9 simple CNN layer combined with Relu.
 * Take serialized data of dimension 8x8x5 matrix obtained from PGN chess dataset taken from <a href="https://www.kaggle.com/datasets/ironicninja/raw-chess-games-pgn">kaggle</a>.
 * Drag and drop feature.
 * Highlight source square.
