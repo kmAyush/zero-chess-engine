@@ -19,28 +19,26 @@ def get_XY(num_samples = None):
             if game is None:
                 break
             
-            # print(f"parsing game {count} got {len(X)} examples")
-            # result = game.headers["Result"]
-            # if result not in values:
-            #     continue
-            # value = values[result]
-            # board = game.board()
+            print(f"parsing game {count} got {len(X)} examples")
+            result = game.headers["Result"]
+            if result not in values:
+                continue
+            value = values[result]
+            board = game.board()
 
-            for i, move in enumerate(game.mainline_moves()):
-                countX+= 1     
-            #     board.push(move)
-            #     serialized_form = State(board).serialize()
-            #     X.append(serialized_form)
-            #     Y.append(value)
-            # if num_samples is not None and len(X) > num_samples:
-            #     return X, Y
+            for i, move in enumerate(game.mainline_moves()):   
+                board.push(move)
+                serialized_form = State(board).serialize()
+                X.append(serialized_form)
+                Y.append(value)
+            if num_samples is not None and len(X) > num_samples:
+                return X, Y
             
             count += 1
-        print(f"parsing game {count} got {countX} examples")
         #break
 
 if __name__ == "__main__":
-    X, Y = get_XY()
+    X, Y = get_XY(1e5)
     if not os.path.exists("serialized_data"):
         os.makedirs("serialized_data")
-    np.savez("serialized_data/dataset_full.npz", X, Y)
+    np.savez("serialized_data/dataset_100k.npz", X, Y)

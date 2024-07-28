@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>CNN-based Chess</title>
+        <link rel="stylesheet" type="text/css" href="static/chessboard.min.css">
+        
+        <script src="static/jquery.min.js"></script>
+        <script src="static/chessboard.min.js"></script>
+    </head>
+
+    <body style="background-color:#22272d;">
+        <div align="center" style="margin-top:10vh;">
+            <div id="board" style="max-width: 600px; margin-top: auto;"></div>
+            <p style="color: white;"></p>
+            <button onclick="newGame()" style="font-size: 22px;margin:4px;">New Game</button>
+            <a href="/selfplay" style="color: white;font-size: 22px;margin:4px;margin-left:10px;" >Play against itself</a>
+        </div>
+        <script type="text/javascript">
+            var board = ChessBoard('board', {
+                position:'start', // start position
+                draggable: true, // make the pieces draggable
+                onDrop: onDrop, // callback when a piece is dropped
+            });
+            var files = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, 'g': 6, 'h': 7};
+
+            function get_source(source) {
+                return 8*(parseInt(source.charAt(1)) - 1)  + files[source.charAt(0)]; 
+                // 8*(row - 1) + column
+            }
+
+            function onDrop(source, target, piece) {
+                if (source == target){ 
+                    return;
+                }
+                var promotion = piece.toLowerCase().charAt(1) == 'p' && parseInt(target.charAt(1)) == 8;
+                // if pawn is promoted, then promotion is true
+
+                $.get( // send a get request to the server
+                    "/move_coordinates",
+                    {
+                        'from': get_source(source), 
+                        'to': get_source(target), 
+                        'promotion': promotion
+                    },
+                    function(r) { // callback function
+                        if (r.includes('game over')) { // if game is over
+                            document.querySelector('p').innerText = "Game Over";
+                        } else {
+                            document.querySelector('p').innerText = "";
+                            board.position(r);
+                        }
+                    });
+                }
+                function newGame(){
+                    $.get(
+                        "/new_game",
+                        function(r) {
+                            document.querySelector('p').innerText = '';
+                            board.position(r);
+                        }
+                    );
+                }
+        </script>
+    </body>
+</html>

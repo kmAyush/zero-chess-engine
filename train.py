@@ -94,7 +94,7 @@ class NeuralNet(nn.Module):
         return F.tanh(x)
 
 if __name__ == "__main__":
-    data_size = '10k'    
+    data_size = '1M'    
     chess_dataset = ValueDataset(data_size)
     data_loader = DataLoader(chess_dataset, batch_size = 32, shuffle = True)
     model = NeuralNet()
