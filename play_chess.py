@@ -16,7 +16,7 @@ warnings.filterwarnings("ignore")
 
 class Evaluator:
     def __init__(self):
-        self.model = torch.load('models/examples_100k.pth')
+        self.model = torch.load('models/examples_6M.pth', map_location="cpu")
 
     def __call__(self, s):
         data = s.serialize()[None]

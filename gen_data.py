@@ -38,7 +38,7 @@ def get_XY(num_samples = None):
         #break
 
 if __name__ == "__main__":
-    X, Y = get_XY(1e5)
+    X, Y = get_XY(6e6)
     if not os.path.exists("serialized_data"):
         os.makedirs("serialized_data")
-    np.savez("serialized_data/dataset_100k.npz", X, Y)
+    np.savez("serialized_data/dataset_6M.npz", X, Y)

@@ -94,25 +94,28 @@ class NeuralNet(nn.Module):
         return F.tanh(x)
 
 if __name__ == "__main__":
-    data_size = '1M'    
+    data_size = '6M'
+    b_size = 1024    
     chess_dataset = ValueDataset(data_size)
-    data_loader = DataLoader(chess_dataset, batch_size = 32, shuffle = True)
+    data_loader = DataLoader(chess_dataset, batch_size = b_size, shuffle = True)
     model = NeuralNet()
     optimizer = optim.Adam(model.parameters())
     mse_loss = nn.MSELoss()
 
-    device = torch.device("cpu")
-    if device == "cuda":
-        model.cuda()
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    print("Device:", device)
+    
+    model.to(device)
 
     model.train()
     print("Dataset Size : ", len(chess_dataset))
-
+    print("Batch Size : ",b_size) 
     for epoch in range(100):
         total_loss = 0
         iterations = 0
         for batch_idx, (data, target) in enumerate(data_loader):
-
+            if batch_idx%1000==0:
+                print("Batch Index",batch_idx)
             #print("X shape = ", data.shape)
             #print("Y shape = ", target.shape)
             target = target.unsqueeze(-1)
