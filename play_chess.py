@@ -24,11 +24,58 @@ class Evaluator:
         output = self.model(torch.tensor(data).float()) # Apply the model
         return output.data.item() # Convert output to scalar and return
 
+MAXVAL = 10000
+class ClassicEvaluator(object):
+    values = { chess.PAWN:1, chess.KNIGHT:3, chess.BISHOP:3.2, chess.ROOK:5, chess.QUEEN:9, chess.KING:0}
+
+    def __call__(self, s):
+        if s.board.is_variant_win():
+            if s.turn == chess.WHITE:
+                return MAXVAL
+            else:
+                return -MAXVAL
+
+        if s.board.is_variant_loss():
+            if s.turn == chess.WHITE:
+                return -MAXVAL
+            else:
+                return MAXVAL
+        val = 0
+        pm = s.board.piece_map()
+        for x in pm:
+            tval = self.values[pm[x].piece_type]
+            if pm[x].color == chess.WHITE:
+                val+= tval
+            else:
+                val -= tval
+        return val
+
+def computer_minimax(s,v,depth=2):
+    if depth==0 or s.board.is_game_over():
+        return v(s)
+    turn = s.board.turn
+    if turn==chess.WHITE:
+        ret = -MAXVAL
+    else:
+        ret = MAXVAL
+
+    for e in s.edges():
+        s.board.push(e)
+        tval = computer_minimax(s,v,depth=-1)
+        if turn == chess.WHITE:
+            ret = max(ret, tval)
+        else:
+            ret = min(ret, tval)
+        s.board.pop()
+
+    return ret
+
+
 def explore(s,eval):
     move_probs = [] # List of (value, move) tuples
     for edge in s.edges():
         s.board.push(edge) 
-        move_probs.append((eval(s), edge)) 
+        move_probs.append((computer_minimax(s,v), edge)) 
         s.board.pop() 
 
     return move_probs
@@ -46,7 +93,7 @@ app = Flask(__name__) # Create a Flask app
 # on running script, __name__ = __main__
 # on importing script, __name__ = name of the script
 
-eval = Evaluator()
+eval = ClassicEvaluator()
 s = State()
 
 @app.route("/")
