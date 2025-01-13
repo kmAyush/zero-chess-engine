@@ -50,9 +50,9 @@ class ClassicEvaluator(object):
                 val -= tval
         return val
 
-def computer_minimax(s,v,depth=2):
+def computer_minimax(s, eval, a,b, depth=2,big=False):
     if depth==0 or s.board.is_game_over():
-        return v(s)
+        return eval(s)
     turn = s.board.turn
     if turn==chess.WHITE:
         ret = -MAXVAL
@@ -61,11 +61,17 @@ def computer_minimax(s,v,depth=2):
 
     for e in s.edges():
         s.board.push(e)
-        tval = computer_minimax(s,v,depth=-1)
+        tval = computer_minimax(s, eval, a,b, depth-1, big)
         if turn == chess.WHITE:
             ret = max(ret, tval)
+            a = max(a,ret)
+            if a>=b:
+                break
         else:
             ret = min(ret, tval)
+            b = min(b, ret)
+            if a>=b:
+                break
         s.board.pop()
 
     return ret
@@ -75,7 +81,7 @@ def explore(s,eval):
     move_probs = [] # List of (value, move) tuples
     for edge in s.edges():
         s.board.push(edge) 
-        move_probs.append((computer_minimax(s,v), edge)) 
+        move_probs.append((computer_minimax(s,v, a=-MAXVAL, b=MAXVAL), edge)) 
         s.board.pop() 
 
     return move_probs
